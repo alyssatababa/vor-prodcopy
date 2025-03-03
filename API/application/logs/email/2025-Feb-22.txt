@@ -1,0 +1,367 @@
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-0XF953UFN zqn9acnVg9xXz7w7oZvP
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952caa07ce-8f045e56-06c4-453c-9b42-ee5f188a56c8-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 15:58:15 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: Rosaly.B.Abapo@SMRetail.com
+Subject: =?iso-8859-1?Q?BEVERLY_ASIA_TRADING_INC._-_Vendor_Information_Submitted?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b983972f7db@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b983972f847&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b983972f847
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear ROSALY B. ABAPO,
+
+Vendor registration information has been submitted by BEVERLY ASIA TRADING
+INC..
+
+Thank You,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b983972f847
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear ROSALY B. ABAPO,&lt;br /&gt;
+&lt;br /&gt;
+Vendor registration information has been submitted by BEVERLY ASIA TRADING INC..&lt;br /&gt;
+&lt;br /&gt;
+Thank You,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b983972f847--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-0XF953UFN QwbV6jbWRqYbGamtKAp8
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952caa0973-c740c75e-1644-4759-b383-cc7c6b6e0eb4-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 15:58:15 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: leane.a.malubag@smretail.com
+Subject: =?iso-8859-1?Q?BEVERLY_ASIA_TRADING_INC._-_Vendor_Information_Submitted?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b98397ac437@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b98397ac486&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b98397ac486
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear LEANE A. MALUBAG,
+
+Vendor registration information has been submitted by BEVERLY ASIA TRADING
+INC..
+
+Thank You,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b98397ac486
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear LEANE A. MALUBAG,&lt;br /&gt;
+&lt;br /&gt;
+Vendor registration information has been submitted by BEVERLY ASIA TRADING INC..&lt;br /&gt;
+&lt;br /&gt;
+Thank You,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b98397ac486--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-0XF953UFN xxbLFZxOQQDClXQmDLEh
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952caa0af4-c9f12ece-3c60-4ca8-a88a-406278b65cee-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 15:58:16 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: VendorRelations.SM.HO@SMRetail.com
+Subject: =?iso-8859-1?Q?BEVERLY_ASIA_TRADING_INC._-_Vendor_Information_Submitted?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b9839820cd0@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b9839820d2b&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b9839820d2b
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear APRIL LUYO BACALSO,
+
+Vendor registration information has been submitted by BEVERLY ASIA TRADING
+INC..
+
+Thank You,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b9839820d2b
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear APRIL LUYO BACALSO,&lt;br /&gt;
+&lt;br /&gt;
+Vendor registration information has been submitted by BEVERLY ASIA TRADING INC..&lt;br /&gt;
+&lt;br /&gt;
+Thank You,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b9839820d2b--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-0XF953UFN lFB0CE6i9Hm6k5OtXtru
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952caa0ccd-fb183030-0e4e-4fc6-83ee-3ab94adf2e8a-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 15:58:16 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: Jacqueline.B.Dadula@smretail.com
+Subject: =?iso-8859-1?Q?BEVERLY_ASIA_TRADING_INC._-_Vendor_Information_Submitted?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b983987f7c8@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b983987f81c&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b983987f81c
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear JACQUELINE BORJA DADULA,
+
+Vendor registration information has been submitted by BEVERLY ASIA TRADING
+INC..
+
+Thank You,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b983987f81c
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear JACQUELINE BORJA DADULA,&lt;br /&gt;
+&lt;br /&gt;
+Vendor registration information has been submitted by BEVERLY ASIA TRADING INC..&lt;br /&gt;
+&lt;br /&gt;
+Thank You,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b983987f81c--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-XG4E4W1SA TerqmK6Ro78DJdAnb683
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952e614871-bd5f114a-29c5-4270-8f93-a5a2bd8f4bcb-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 23:58:02 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: om2020.bayo@gmail.com
+Subject: =?iso-8859-1?Q?Deactivated_Due_to_Non-submission_of_Primary?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b9f40a2564f@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b9f40a25725&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b9f40a25725
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear ONE UNICA HIJA INNOVATION INC.,
+
+Your failure to submit all the primary requirements on, or before, the given
+deadline has led to the deactivation of your login account.
+
+Thank you.
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b9f40a25725
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear ONE UNICA HIJA INNOVATION INC.,&lt;br /&gt;
+&lt;br /&gt;
+Your failure to submit all the primary requirements on, or before, the given deadline has led to the deactivation of your login account.&lt;br /&gt;
+&lt;br /&gt;
+Thank you.&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b9f40a25725--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-8LFUWI5GN VINMGrbIwTs6th5fcwp2
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01952e6149c3-65fb1c8d-3ee2-4773-a094-95e5d2d1e907-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 22 Feb 2025 23:58:02 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: kristinekaye.b.ramelo@smretail.com
+Subject: =?iso-8859-1?Q?ONE_UNICA_HIJA_INNOVATION_INC._-_User_Account_Deactivated?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67b9f40a743fe@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67b9f40a74470&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67b9f40a74470
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear KRISTINE KAY B. RAMELO,
+
+The login account for ONE UNICA HIJA INNOVATION INC. has been deactivated
+due to failure to submit all Primary requirements on, or before, the given
+deadline.
+
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67b9f40a74470
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear KRISTINE KAY B. RAMELO,&lt;br /&gt;
+&lt;br /&gt;
+The login account for ONE UNICA HIJA INNOVATION INC. has been deactivated due to failure to submit all Primary requirements on, or before, the given deadline.&lt;br /&gt;
+&lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67b9f40a74470--</pre>

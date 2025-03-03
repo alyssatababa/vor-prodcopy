@@ -1,0 +1,122 @@
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-IE5C652SA cXS2SrDyYDVOISRbxFA7
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01953387a316-88aedf56-14ee-4b4d-bb54-d6e684053888-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sun, 23 Feb 2025 23:58:01 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: twcorp.888@gmail.com
+Subject: =?iso-8859-1?Q?Deactivated_Due_to_Non-submission_of_Primary?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67bb4589c70db@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67bb4589c71f1&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67bb4589c71f1
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear T&amp;W APPAREL INC.,
+
+Your failure to submit all the primary requirements on, or before, the given
+deadline has led to the deactivation of your login account.
+
+Thank you.
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67bb4589c71f1
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear T&amp;W APPAREL INC.,&lt;br /&gt;
+&lt;br /&gt;
+Your failure to submit all the primary requirements on, or before, the given deadline has led to the deactivation of your login account.&lt;br /&gt;
+&lt;br /&gt;
+Thank you.&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67bb4589c71f1--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-IE5C652SA OLWwrUoqELTQU7i8CFta
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e01953387a451-f350eb9e-f110-4d99-8794-83c2b43a5222-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sun, 23 Feb 2025 23:58:02 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: CaseylynJoyce.T.Ong@smretail.com
+Subject: =?iso-8859-1?Q?T&amp;W_APPAREL_INC._-_User_Account_Deactivated?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;67bb458a21566@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_67bb458a215b5&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_67bb458a215b5
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear CASEYLYN JOYCE T. ONG,
+
+The login account for T&amp;W APPAREL INC. has been deactivated due to failure
+to submit all Primary requirements on, or before, the given deadline.
+
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_67bb458a215b5
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear CASEYLYN JOYCE T. ONG,&lt;br /&gt;
+&lt;br /&gt;
+The login account for T&amp;W APPAREL INC. has been deactivated due to failure to submit all Primary requirements on, or before, the given deadline.&lt;br /&gt;
+&lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_67bb458a215b5--</pre>

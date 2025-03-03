@@ -1,0 +1,240 @@
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-NLOTR8DDA K7VW1EE3yOxEJiLnoEiW
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e0194bf84dca7-a948b691-805d-40c4-a922-c11862e4de34-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 1 Feb 2025 11:19:02 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: Rosaly.B.Abapo@SMRetail.com
+Subject: =?iso-8859-1?Q?TYKES_TRADING_INC._-_Resubmitted_Primary_Requirements?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;679d92a6df900@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_679d92a6df94f&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_679d92a6df94f
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear ROSALY B. ABAPO,
+ 
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.
+ 
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_679d92a6df94f
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear ROSALY B. ABAPO,&lt;br /&gt;
+ &lt;br /&gt;
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.&lt;br /&gt;
+ &lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_679d92a6df94f--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-7G18GKRCA 5uKW94aNf8vgnlWlWAvj
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e0194bf84de25-53e8e692-e81c-4771-b8a9-f1c70dcdcb73-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 1 Feb 2025 11:19:03 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: leane.a.malubag@smretail.com
+Subject: =?iso-8859-1?Q?TYKES_TRADING_INC._-_Resubmitted_Primary_Requirements?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;679d92a746530@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_679d92a746588&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_679d92a746588
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear LEANE A. MALUBAG,
+ 
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.
+ 
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_679d92a746588
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear LEANE A. MALUBAG,&lt;br /&gt;
+ &lt;br /&gt;
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.&lt;br /&gt;
+ &lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_679d92a746588--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-K80BWXBDA jw3CXJlznveNCy3b80od
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e0194bf84df96-f577be4f-145e-40bb-912a-a5d3fd16ff4e-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 1 Feb 2025 11:19:03 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: VendorRelations.SM.HO@SMRetail.com
+Subject: =?iso-8859-1?Q?TYKES_TRADING_INC._-_Resubmitted_Primary_Requirements?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;679d92a7a58a4@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_679d92a7a58f8&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_679d92a7a58f8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear APRIL LUYO BACALSO,
+ 
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.
+ 
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_679d92a7a58f8
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear APRIL LUYO BACALSO,&lt;br /&gt;
+ &lt;br /&gt;
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.&lt;br /&gt;
+ &lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_679d92a7a58f8--</pre>
+220 email-smtp.amazonaws.com ESMTP SimpleEmailService-d-ZNKLB8BDA xof3tABnsB9WHvMHLdG7
+<br /><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>starttls: 220 Ready to start TLS
+</pre><pre>hello: 250-email-smtp.amazonaws.com
+250-8BITMIME
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250 Ok
+</pre><pre>from: 250 Ok
+</pre><pre>to: 250 Ok
+</pre><pre>data: 354 End data with <CR><LF>.<CR><LF>
+</pre>250 Ok 010e0194bf84e113-32fad0bb-c008-42e8-a3c8-1543c4e29ac0-000000
+<br /><pre>quit: 221 Bye
+</pre>Your message has been successfully sent using the following protocol: smtp<br /><pre>User-Agent: CodeIgniter
+Date: Sat, 1 Feb 2025 11:19:04 +0800
+From: &quot;SM Vendor Online Registration&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+Return-Path: &lt;smvendoronlineregistration@smretail.com&gt;
+To: Jacqueline.B.Dadula@smretail.com
+Subject: =?iso-8859-1?Q?TYKES_TRADING_INC._-_Resubmitted_Primary_Requirements?=
+Reply-To: &quot;smvendoronlineregistration@smretail.com&quot; &lt;smvendoronlineregistration@smretail.com&gt;
+X-Sender: smvendoronlineregistration@smretail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;679d92a80f0f0@smretail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_679d92a80f225&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_679d92a80f225
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+Dear JACQUELINE BORJA DADULA,
+ 
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.
+ 
+Thank you,
+SM Vendor Online Registration Admin
+
+
+--B_ALT_679d92a80f225
+Content-Type: text/html; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear JACQUELINE BORJA DADULA,&lt;br /&gt;
+ &lt;br /&gt;
+TYKES TRADING INC. has resubmitted his/her Incomplete Requirements.&lt;br /&gt;
+ &lt;br /&gt;
+Thank you,&lt;br /&gt;
+SM Vendor Online Registration Admin
+
+--B_ALT_679d92a80f225--</pre>

@@ -1,0 +1,849 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+*
+*/
+class mms_report extends CI_Model
+{
+	
+	function get_data(){
+		$file_name = date('mdy').'.VOR';
+		$vendor_codes = '';
+		$vendor_codes_02 = '';
+		$vendor_codes_v4 = '';
+		$vendor_codes_v5 = '';
+		$old_dept = [];
+		$date = '2024-02-27 00:00:01';
+		$path = FCPATH;
+
+
+
+
+		// count of days for extraction
+		$get_sys = $this->db->query("SELECT CONFIG_VALUE FROM SMNTP_SYSTEM_CONFIG WHERE CONFIG_NAME = 'extraction_mms'");
+		$result_sys = $get_sys->result();
+		$sys = $result_sys[0]->CONFIG_VALUE;
+
+		$update_records = array(
+								'MMS_EXTRACTED' => 'Y',
+								'MMS_DATE_EXTRACTED' => date('Y-m-d H:i:s')
+							);
+
+		// one time extraction for SAP and MMS
+		 $get_vendor_code_new = $this->db->query("SELECT SV_01.`VENDOR_CODE`, SV_02.`VENDOR_CODE_02` FROM SMNTP_VOR_EXTRACT SVE
+						LEFT JOIN SMNTP_VENDOR SV_01 ON SVE.`VENDOR_CODE` = SV_01.`VENDOR_CODE`
+						LEFT JOIN SMNTP_VENDOR SV_02 ON SVE.`VENDOR_CODE` = SV_02.`VENDOR_CODE_02`
+						WHERE SVE.`MMS_EXTRACTED` != 'Y'");
+		$result_vendor_code_new = $get_vendor_code_new->result();
+		$count_vendor_code_new = count($result_vendor_code_new);
+		 if($count_vendor_code_new > 0){
+		 	for($a=0; $a<$count_vendor_code_new; $a++){
+		 		if($a == 0){
+		 			$vendor_codes .= '"'. $result_vendor_code_new[$a]->VENDOR_CODE . '"';
+		 			$vendor_codes_v4 .= '"'. $result_vendor_code_new[$a]->VENDOR_CODE_02 . '"';
+		 		}else{
+		 			$vendor_codes .= ',"'. $result_vendor_code_new[$a]->VENDOR_CODE . '"';	
+		 			$vendor_codes_v4 .= ',"'. $result_vendor_code_new[$a]->VENDOR_CODE_02 . '"';	
+		 		}
+
+		 		$this->db->where('VENDOR_CODE', $result_vendor_code_new[$a]->VENDOR_CODE);
+		 		$this->db->or_where('VENDOR_CODE', $result_vendor_code_new[$a]->VENDOR_CODE_02);
+		 		$this->db->update('SMNTP_VOR_EXTRACT', $update_records);
+		 	}
+		 }
+
+		//return $vendor_codes;
+
+		/*if(strpos($path, 'dev') || strpos($path, 'uat')){
+			$date_to = $this->db->query("SELECT * FROM SMNTP_VENDOR_STATUS_LOGS WHERE status_id = 19 AND DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+		}*/
+		
+		$date_to = $this->db->query("SELECT * FROM SMNTP_VENDOR_STATUS_LOGS WHERE status_id = 19 AND DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+		
+		
+		$result_date_to = $date_to->result();
+		$count_date_to = count($result_date_to);
+
+		//return $this->db->last_query();
+		//return $vendor_codes;
+		if($count_date_to >= 0){
+			for($e=0; $e < $count_date_to; $e++){
+			
+				$date_from = $this->db->query("SELECT DATE_UPDATED
+										FROM SMNTP_VENDOR_STATUS_LOGS 
+										WHERE VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID." AND STATUS_ID = 19 AND DATE_UPDATED < '".$result_date_to[$e]->DATE_UPDATED."'
+										ORDER BY DATE_UPDATED DESC
+										LIMIT 0,1");
+
+				$result_date_from = $date_from->result();
+				$count_date_from = count($result_date_from);
+
+				//return $this->db->last_query();
+				//return $result_date_from[$e];
+				
+
+				
+
+
+				if($count_date_from > 0){
+					for($f=0; $f < $count_date_from; $f++){
+					$get_vendor_invite_id = $this->db->query("SELECT * FROM SMNTP_VENDOR_STATUS_LOGS 
+						WHERE DATE_UPDATED BETWEEN '".$result_date_from[$f]->DATE_UPDATED."' AND '". $result_date_to[$e]->DATE_UPDATED."'
+						AND VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID." ORDER BY DATE_UPDATED LIMIT 1,1");
+					$result_get_vendor_invite_id = $get_vendor_invite_id->result();
+
+
+						if($result_get_vendor_invite_id[0]->DATE_UPDATED != ''){
+
+							// Add Department
+
+							if($result_get_vendor_invite_id[0]->STATUS_ID == 250){
+								$vendor_code_adh = $this->db->query("SELECT * FROM SMNTP_VENDOR_ADH
+																	WHERE VENDOR_INVITE_ID = ".$result_get_vendor_invite_id[0]->VENDOR_INVITE_ID."
+																	AND DATE_CREATED BETWEEN DATE_SUB('".$result_get_vendor_invite_id[0]->DATE_UPDATED."', INTERVAL 1 MINUTE) AND '".$result_get_vendor_invite_id[0]->DATE_UPDATED."'");
+								$result_vendor_code_adh = $vendor_code_adh->result();
+
+								//return $result_vendor_code_adh;
+
+								if($result_vendor_code_adh[0]->VENDOR_TYPE != $result_vendor_code_adh[0]->MAIN_VT){
+									$get_dept =  $this->db->query("SELECT SVAC.VENDOR_CAT_ID, SV.VENDOR_CODE_02 AS VENDOR_CODE, SVAC.VENDOR_INVITE_ID, SVAC.CATEGORY_ID, SVAC.DATE_CREATED, SVAC.ACTIVE, 'VC02' as TYPE FROM SMNTP_VENDOR_AVC_CAT SVAC
+										JOIN SMNTP_VENDOR SV ON SV.VENDOR_INVITE_ID = SVAC.VENDOR_INVITE_ID
+										WHERE SVAC.VENDOR_INVITE_ID = ".$result_get_vendor_invite_id[0]->VENDOR_INVITE_ID."
+										AND SVAC.DATE_CREATED BETWEEN '".$result_get_vendor_invite_id[0]->DATE_UPDATED."' AND '".$result_date_to[$e]->DATE_UPDATED."'");
+									$result_get_dept = $get_dept->result_array();
+									$old_dept = array_merge($old_dept, $result_get_dept);
+
+								}else{
+									$get_dept =  $this->db->query("SELECT SVC.VENDOR_CAT_ID, SV.VENDOR_CODE, SVC.VENDOR_INVITE_ID, SVC.CATEGORY_ID, SVC.DATE_CREATED, SVC.ACTIVE, 'VC01' as TYPE FROM SMNTP_VENDOR_CATEGORIES SVC
+										JOIN SMNTP_VENDOR SV ON SV.VENDOR_INVITE_ID = SVC.VENDOR_INVITE_ID
+										WHERE SVC.VENDOR_INVITE_ID = ".$result_get_vendor_invite_id[0]->VENDOR_INVITE_ID."
+										AND SVC.DATE_CREATED BETWEEN '".$result_get_vendor_invite_id[0]->DATE_UPDATED."' AND '".$result_date_to[$e]->DATE_UPDATED."'");
+									$result_get_dept = $get_dept->result_array();
+									$old_dept = array_merge($old_dept, $result_get_dept);
+
+								}
+
+								//return $this->db->last_query();
+
+								//return $result_vendor_code_adh[$f]->VENDOR_TYPE;
+
+								if($result_vendor_code_adh[0]->VENDOR_TYPE != $result_vendor_code_adh[0]->MAIN_VT){
+									$vendor_code = $this->db->query("SELECT SV.VENDOR_CODE_02, SVI.REGISTRATION_TYPE
+													FROM SMNTP_VENDOR SV 
+													JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+													WHERE SV.VENDOR_INVITE_ID = ".$result_vendor_code_adh[0]->VENDOR_INVITE_ID."");
+									$result_vendor_code = $vendor_code->result();
+									$count_vendor_code = count($result_vendor_code);
+									if($count_vendor_code > 0){
+										if($result_vendor_code[0]->REGISTRATION_TYPE != 4){
+											if($vendor_codes_02 != ''){
+												$vendor_codes_02 .= ',"'. $result_vendor_code[0]->VENDOR_CODE_02 . '"';	
+											}else{
+												$vendor_codes_02 .= '"'. $result_vendor_code[0]->VENDOR_CODE_02 . '"';	
+											}
+										}else{
+											if($vendor_codes_v4 != ''){
+												$vendor_codes_v4 .= ',"'. $result_vendor_code[0]->VENDOR_CODE_02 . '"';	
+											}else{
+												$vendor_codes_v4 .= '"'. $result_vendor_code[0]->VENDOR_CODE_02 . '"';	
+											}
+										}
+									}
+								}else{
+									$vendor_code = $this->db->query("SELECT SV.VENDOR_CODE, SVI.REGISTRATION_TYPE 
+													FROM SMNTP_VENDOR SV 
+													JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+													WHERE SV.VENDOR_INVITE_ID = ".$result_vendor_code_adh[0]->VENDOR_INVITE_ID."");
+									$result_vendor_code = $vendor_code->result();
+									$count_vendor_code = count($result_vendor_code);
+
+									if($count_vendor_code > 0){
+										if($result_vendor_code[0]->REGISTRATION_TYPE != 4){
+											if($vendor_codes != ''){
+												$vendor_codes .= ',"'. $result_vendor_code[0]->VENDOR_CODE . '"';	
+											}else{
+												$vendor_codes .= '"'. $result_vendor_code[0]->VENDOR_CODE . '"';	
+											}
+										}else{
+											if($vendor_codes_v5 != ''){
+												$vendor_codes_v5 .= ',"'. $result_vendor_code[0]->VENDOR_CODE . '"';	
+											}else{
+												$vendor_codes_v5 .= '"'. $result_vendor_code[0]->VENDOR_CODE . '"';	
+											}
+										}
+									}
+
+									//return $vendor_codes_v4;
+									//return $this->db->last_query();
+								}
+							}else{
+								// registration type = 2,3
+								$get_vendor_code = $this->db->query("SELECT SV.VENDOR_CODE FROM SMNTP_VENDOR_INVITE SVI 
+																	 JOIN SMNTP_VENDOR SV ON SVI.VENDOR_INVITE_ID = SV.VENDOR_INVITE_ID
+																	 JOIN SMNTP_VENDOR_STATUS SVS ON SVI.VENDOR_INVITE_ID = SVS.VENDOR_INVITE_ID
+																	 WHERE SVS.STATUS_ID = 19
+																	 AND SVI.VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID."
+																	 AND SVI.REGISTRATION_TYPE IN (2,3,5) 
+																	 AND SVS.DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+								$result_vendor_code = $get_vendor_code->result();
+								$count_vendor_code = count($result_vendor_code);
+
+								if($count_vendor_code > 0){
+									for($b=0; $b<$count_vendor_code; $b++){
+										if($vendor_codes != ''){
+											$vendor_codes .= ',"'. $result_vendor_code[$b]->VENDOR_CODE . '"';	
+										}else{
+											$vendor_codes .= '"'. $result_vendor_code[$b]->VENDOR_CODE . '"';	
+										}
+									}
+								}
+
+									// registration type = 2, 3
+								 $get_vendor_code_02 = $this->db->query("SELECT SV.VENDOR_CODE_02 FROM SMNTP_VENDOR_INVITE SVI 
+																	 JOIN SMNTP_VENDOR SV ON SVI.VENDOR_INVITE_ID = SV.VENDOR_INVITE_ID
+																	 JOIN SMNTP_VENDOR_STATUS SVS ON SVI.VENDOR_INVITE_ID = SVS.VENDOR_INVITE_ID
+																	 WHERE SVS.STATUS_ID = 19 
+																	 AND SVI.VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID."
+																	 AND SV.VENDOR_CODE_02 IS NOT NULL
+																	 AND SVI.REGISTRATION_TYPE IN (2,3) 
+																	 AND SVS.DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+
+
+								$result_vendor_code_02 = $get_vendor_code_02->result();
+								$count_vendor_code_02 = count($result_vendor_code_02);
+								if($count_vendor_code_02 > 0){
+									for($c=0; $c<$count_vendor_code_02; $c++){
+										if($vendor_codes_02 != ''){
+											$vendor_codes_02 .= ',"'. $result_vendor_code_02[$c]->VENDOR_CODE_02 . '"';	
+										}else{
+											$vendor_codes_02 .= '"'. $result_vendor_code_02[$c]->VENDOR_CODE_02 . '"';	
+										}
+									}
+								}
+							}	
+						}
+					}
+				}else{
+					// registration type = 2,3
+					$get_vendor_code = $this->db->query("SELECT SV.VENDOR_CODE FROM SMNTP_VENDOR_INVITE SVI 
+														 JOIN SMNTP_VENDOR SV ON SVI.VENDOR_INVITE_ID = SV.VENDOR_INVITE_ID
+														 JOIN SMNTP_VENDOR_STATUS SVS ON SVI.VENDOR_INVITE_ID = SVS.VENDOR_INVITE_ID
+														 WHERE SVS.STATUS_ID = 19
+														 AND SVI.VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID."
+														 AND SVI.REGISTRATION_TYPE IN (1,2,3,5) 
+														 AND SVS.DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+					$result_vendor_code = $get_vendor_code->result();
+					$count_vendor_code = count($result_vendor_code);
+
+					//return $this->db->last_query();
+
+					if($count_vendor_code > 0){
+						for($b=0; $b<$count_vendor_code; $b++){
+							if($vendor_codes != ''){
+								$vendor_codes .= ',"'. $result_vendor_code[$b]->VENDOR_CODE . '"';	
+							}else{
+								$vendor_codes .= '"'. $result_vendor_code[$b]->VENDOR_CODE . '"';
+							}
+						}
+					}
+
+
+						// registration type = 2, 3
+					 $get_vendor_code_02 = $this->db->query("SELECT SV.VENDOR_CODE_02 FROM SMNTP_VENDOR_INVITE SVI 
+														 JOIN SMNTP_VENDOR SV ON SVI.VENDOR_INVITE_ID = SV.VENDOR_INVITE_ID
+														 JOIN SMNTP_VENDOR_STATUS SVS ON SVI.VENDOR_INVITE_ID = SVS.VENDOR_INVITE_ID
+														 WHERE SVS.STATUS_ID = 19 
+														 AND SVI.VENDOR_INVITE_ID = ".$result_date_to[$e]->VENDOR_INVITE_ID."
+														 AND SV.VENDOR_CODE_02 IS NOT NULL
+														 AND SVI.REGISTRATION_TYPE IN (2,3) 
+														 AND SVS.DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+
+
+					$result_vendor_code_02 = $get_vendor_code_02->result();
+					$count_vendor_code_02 = count($result_vendor_code_02);
+					if($count_vendor_code_02 > 0){
+						for($c=0; $c<$count_vendor_code_02; $c++){
+							if($vendor_codes_02 != ''){
+								$vendor_codes_02 .= ',"'. $result_vendor_code_02[$c]->VENDOR_CODE_02 . '"';	
+							}else{
+								$vendor_codes_02 .= '"'. $result_vendor_code_02[$c]->VENDOR_CODE_02 . '"';	
+							}
+						}
+					}
+				}				
+			}
+		}		
+
+		//return $vendor_codes_v4;
+		 //return $old_dept;
+
+			if($vendor_codes != ''){
+				$query = 'SELECT DISTINCT
+							CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes.') THEN SV.VENDOR_CODE
+								ELSE SV.VENDOR_CODE_02
+								END AS VENDOR_CODE,
+							UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_LONG,
+							UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_SHORT,
+							UCASE(SVA.ADDRESS_LINE) AS ADDRESS,
+							UCASE(fn_remove_specialchar(SCity.CITY_NAME)) AS CITY,
+							UCASE(fn_remove_specialchar(SSP.STATE_PROV_NAME)) AS STATE, 
+							"PH" AS COUNTRY, 
+							SVA.ZIP_CODE AS ZIP_CODE,
+							CASE WHEN CD.TEL_NO = 0 THEN "" ELSE CD.TEL_NO END AS TEL_NO,
+							SO.OWNERSHIP_NAME AS OWNERSHIP,
+							CASE WHEN CD.FAX_NO = 0 THEN "" ELSE CD.FAX_NO END AS S_FAX,
+							CASE WHEN STP.TERMS_PAYMENT_NAME = "30 DAYS" THEN 200 WHEN STP.TERMS_PAYMENT_NAME = "60 DAYS" THEN 400 WHEN STP.TERMS_PAYMENT_NAME = "COD less 5%" THEN 562 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE = 37 THEN 842 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE != 37 THEN 810 WHEN "COD 7 DAYS" THEN 500 END AS TERMS_PAYMENT,
+							CONCAT(fn_remove_specialchar(AVR.FIRST_NAME), " ", fn_remove_specialchar(AVR.MIDDLE_NAME), " ",fn_remove_specialchar(AVR.LAST_NAME)) AS AUTHREP,
+							SV.TAX_ID_NO,
+							fn_remove_specialchar(SVO.FIRST_NAME) AS OWNER_FIRST_NAME, fn_remove_specialchar(SVO.MIDDLE_NAME) AS OWNER_MIDDLE_NAME, fn_remove_specialchar(SVO.LAST_NAME) AS OWNER_LAST_NAME,
+							CASE LENGTH(SME.COMPANY_CODE) 
+								WHEN 1 THEN CONCAT("00",SME.COMPANY_CODE)
+								WHEN 2 THEN CONCAT("0",SME.COMPANY_CODE)
+								WHEN 3 THEN SME.COMPANY_CODE END AS COMPANY_CODE,
+							CASE LENGTH(SME.DEPT) WHEN 1 THEN CONCAT("00",SME.DEPT)
+								WHEN 2 THEN CONCAT("0",SME.DEPT)
+								WHEN 3 THEN SME.DEPT END AS DEPT_CODE,
+							PSIS.USERNAME, PSIS.EMAIL, VP.VENDOR_TYPE, fn_remove_specialchar(VP.CONTACT_PERSON) AS CONTACT_PERSON, VP.POSITION, VP.EMAIL as VP_EMAIL, VP.MOBILE_NO
+							FROM SMNTP_VENDOR SV
+							JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+							JOIN SMNTP_VENDOR_TYPE SVT ON SV.VENDOR_TYPE = SVT.VENDOR_TYPE_ID
+							JOIN SMNTP_VENDOR_ADDRESSES SVA ON SV.VENDOR_ID = SVA.VENDOR_ID AND SVA.ADDRESS_TYPE = "1" AND `PRIMARY` = 1
+							JOIN SMNTP_CITY SCity ON SVA.BRGY_MUNICIPALITY_ID = SCity.CITY_ID
+							JOIN SMNTP_STATE_PROVINCE SSP ON SVA.STATE_PROVINCE_ID = SSP.STATE_PROV_ID
+							JOIN SMNTP_COUNTRY SCountry ON SVA.COUNTRY_ID = SCountry.COUNTRY_ID
+							JOIN(SELECT VENDOR_ID, REPLACE(GROUP_CONCAT(TEL_NO),",","") AS TEL_NO, SUM(TEL_NO_EXTENSION_LOCAL_NUMBER)AS TEL_NO_EXTENSION_LOCAL_NUMBER, REPLACE(GROUP_CONCAT(FAX_NO),",","") AS FAX_NO,SUM(FAX_NO_EXTENSION_LOCAL_NUMBER) AS FAX_NO_EXTENSION_LOCAL_NUMBER,SUM(MOBILE_NO) AS MOBILE_NO, REPLACE(GROUP_CONCAT(EMAIL),",","") AS EMAIL FROM (
+							SELECT
+							SVCDTHREE.VENDOR_ID,
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN CONCAT(SVCDTHREE.AREA_CODE, " ",SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS TEL_NO, 
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS TEL_NO_EXTENSION_LOCAL_NUMBER, 
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN CONCAT(SVCDTHREE.AREA_CODE, " ", SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS FAX_NO,
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS FAX_NO_EXTENSION_LOCAL_NUMBER, 
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 3 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS MOBILE_NO,
+							CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 4 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS EMAIL
+							FROM 
+								(SELECT VENDOR_ID, CONTACT_DETAIL_TYPE, MIN(VENDOR_CONTACT_DETAIL_ID) AS VENDOR_CONTACT_DETAIL_ID FROM SMNTP_VENDOR_CONTACT_DETAILS GROUP BY VENDOR_ID,CONTACT_DETAIL_TYPE) SAC
+								JOIN SMNTP_VENDOR_CONTACT_DETAILS SVCDTHREE ON SAC.VENDOR_CONTACT_DETAIL_ID = SVCDTHREE.VENDOR_CONTACT_DETAIL_ID)a GROUP BY VENDOR_ID) 
+							CD ON SV.VENDOR_ID = CD.VENDOR_ID
+							JOIN (SELECT SVRONE.* FROM 
+								(SELECT VENDOR_ID, MIN(VENDOR_REP_ID) AS VENDOR_REP_ID FROM SMNTP_VENDOR_REP GROUP BY VENDOR_ID) SAB
+								JOIN SMNTP_VENDOR_REP SVRONE ON SAB.VENDOR_REP_ID = SVRONE.VENDOR_REP_ID
+							) AVR ON SV.VENDOR_ID = AVR.VENDOR_ID
+							JOIN (
+								SELECT SVOONE.* FROM 
+								(SELECT VENDOR_ID, MIN(VENDOR_OWNER_ID) AS VENDOR_OWNER_ID FROM SMNTP_VENDOR_OWNERS GROUP BY VENDOR_ID) SAA
+								JOIN SMNTP_VENDOR_OWNERS SVOONE ON SAA.VENDOR_OWNER_ID = SVOONE.VENDOR_OWNER_ID
+							) SVO ON SV.VENDOR_ID = SVO.VENDOR_ID
+							JOIN SMNTP_OWNERSHIP SO ON SV.OWNERSHIP_TYPE = SO.OWNERSHIP_ID
+							JOIN SMNTP_VENDOR_STATUS SS ON SV.VENDOR_INVITE_ID = SS.VENDOR_INVITE_ID
+							JOIN SMNTP_TERMS_PAYMENT STP ON 
+								CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes.') THEN SS.TERMSPAYMENT 
+								ELSE SS.AVC_TERMSPAYMENT 
+								END  = STP.TERMS_PAYMENT_ID
+							JOIN (SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID, SVC.DATE_CREATED FROM SMNTP_VENDOR_CATEGORIES SVC 
+								JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID AND SCat.CATEGORY_ID != 259
+								JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+								JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT) SME ON SV.VENDOR_INVITE_ID = SME.VENDOR_INVITE_ID
+							LEFT JOIN (SELECT
+								SV.`VENDOR_ID`, CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS USERNAME,
+								SVSS.`EMAIL`,
+								SVSS.TRADE_VENDOR_TYPE
+								FROM SMNTP_VENDOR SV
+								JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+								JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` AND SSS.DESCRIPTION LIKE "%PSIS%"
+								AND SSS.DESCRIPTION LIKE "%PSIS%")PSIS ON SV.`VENDOR_ID` = PSIS.VENDOR_ID
+								AND CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+									CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+								ELSE 
+									SV.TRADE_VENDOR_TYPE
+								END
+								= PSIS.TRADE_VENDOR_TYPE
+							LEFT JOIN (SELECT SV.VENDOR_ID,SVSS.`TRADE_VENDOR_TYPE`, CASE SVSS.`TRADE_VENDOR_TYPE` WHEN 1 THEN "Outright" WHEN 2 THEN "Store Consignor" END AS VENDOR_TYPE,
+								CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS CONTACT_PERSON,
+								SVSS.POSITION, SVSS.EMAIL, SVSS.MOBILE_NO
+								FROM SMNTP_VENDOR SV
+								JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+								JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` 
+								WHERE 1=1 AND SSS.DESCRIPTION = "SM Vendor Portal") VP ON SV.VENDOR_ID = VP.VENDOR_ID 
+								AND CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+									CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+								ELSE 
+									SV.TRADE_VENDOR_TYPE
+								END
+								= VP.TRADE_VENDOR_TYPE
+							WHERE SV.VENDOR_CODE IN ('.$vendor_codes.') OR SV.VENDOR_CODE_02 IN ('.$vendor_codes.')';
+
+						$res = $this->db->query($query);
+						$res = $res->result_array();
+			}else{
+				$res = [];
+			}
+
+			//return $res;
+
+			//return $this->db->last_query();
+			
+			if($vendor_codes_02 != ''){
+				$query2 = 'SELECT DISTINCT
+						CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes_02.') THEN SV.VENDOR_CODE
+							ELSE SV.VENDOR_CODE_02
+							END AS VENDOR_CODE,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_LONG,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_SHORT,
+						UCASE(fn_remove_specialchar(SVA.ADDRESS_LINE)) AS ADDRESS,
+						UCASE(fn_remove_specialchar(SCity.CITY_NAME)) AS CITY,
+						UCASE(fn_remove_specialchar(SSP.STATE_PROV_NAME)) AS STATE, 
+						"PH" AS COUNTRY, 
+						SVA.ZIP_CODE AS ZIP_CODE,
+						CASE WHEN CD.TEL_NO = 0 THEN "" ELSE CD.TEL_NO END AS TEL_NO,
+						SO.OWNERSHIP_NAME AS OWNERSHIP,
+						CASE WHEN CD.FAX_NO = 0 THEN "" ELSE CD.FAX_NO END AS S_FAX,
+						CASE WHEN STP.TERMS_PAYMENT_NAME = "30 DAYS" THEN 200 WHEN STP.TERMS_PAYMENT_NAME = "60 DAYS" THEN 400 WHEN STP.TERMS_PAYMENT_NAME = "COD less 5%" THEN 562 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE = 37 THEN 842 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE != 37 THEN 810 WHEN "COD 7 DAYS" THEN 500 END AS TERMS_PAYMENT,
+						CONCAT(fn_remove_specialchar(AVR.FIRST_NAME), " ", fn_remove_specialchar(AVR.MIDDLE_NAME), " ",fn_remove_specialchar(AVR.LAST_NAME)) AS AUTHREP,
+						SV.TAX_ID_NO,
+						fn_remove_specialchar(SVO.FIRST_NAME) AS OWNER_FIRST_NAME, fn_remove_specialchar(SVO.MIDDLE_NAME) AS OWNER_MIDDLE_NAME, fn_remove_specialchar(SVO.LAST_NAME) AS OWNER_LAST_NAME,
+						CASE LENGTH(SME.COMPANY_CODE) 
+							WHEN 1 THEN CONCAT("00",SME.COMPANY_CODE)
+							WHEN 2 THEN CONCAT("0",SME.COMPANY_CODE)
+							WHEN 3 THEN SME.COMPANY_CODE END AS COMPANY_CODE,
+						CASE LENGTH(SME.DEPT) WHEN 1 THEN CONCAT("00",SME.DEPT)
+							WHEN 2 THEN CONCAT("0",SME.DEPT)
+							WHEN 3 THEN SME.DEPT END AS DEPT_CODE,
+						PSIS.USERNAME, PSIS.EMAIL, VP.VENDOR_TYPE, fn_remove_specialchar(VP.CONTACT_PERSON) AS CONTACT_PERSON, VP.POSITION, VP.EMAIL as VP_EMAIL, VP.MOBILE_NO
+						FROM SMNTP_VENDOR SV
+						JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+						JOIN SMNTP_VENDOR_TYPE SVT ON SV.VENDOR_TYPE = SVT.VENDOR_TYPE_ID
+						JOIN SMNTP_VENDOR_ADDRESSES SVA ON SV.VENDOR_ID = SVA.VENDOR_ID AND SVA.ADDRESS_TYPE = "1" AND `PRIMARY` = 1
+						JOIN SMNTP_CITY SCity ON SVA.BRGY_MUNICIPALITY_ID = SCity.CITY_ID
+						JOIN SMNTP_STATE_PROVINCE SSP ON SVA.STATE_PROVINCE_ID = SSP.STATE_PROV_ID
+						JOIN SMNTP_COUNTRY SCountry ON SVA.COUNTRY_ID = SCountry.COUNTRY_ID
+						JOIN(SELECT VENDOR_ID, REPLACE(GROUP_CONCAT(TEL_NO),",","") AS TEL_NO, SUM(TEL_NO_EXTENSION_LOCAL_NUMBER)AS TEL_NO_EXTENSION_LOCAL_NUMBER, REPLACE(GROUP_CONCAT(FAX_NO),",","") AS FAX_NO,SUM(FAX_NO_EXTENSION_LOCAL_NUMBER) AS FAX_NO_EXTENSION_LOCAL_NUMBER,SUM(MOBILE_NO) AS MOBILE_NO, REPLACE(GROUP_CONCAT(EMAIL),",","") AS EMAIL FROM (
+						SELECT
+						SVCDTHREE.VENDOR_ID,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN CONCAT(SVCDTHREE.AREA_CODE, " ",SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS TEL_NO, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS TEL_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN CONCAT(SVCDTHREE.AREA_CODE, " ", SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS FAX_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS FAX_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 3 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS MOBILE_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 4 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS EMAIL
+						FROM 
+							(SELECT VENDOR_ID, CONTACT_DETAIL_TYPE, MIN(VENDOR_CONTACT_DETAIL_ID) AS VENDOR_CONTACT_DETAIL_ID FROM SMNTP_VENDOR_CONTACT_DETAILS GROUP BY VENDOR_ID,CONTACT_DETAIL_TYPE) SAC
+							JOIN SMNTP_VENDOR_CONTACT_DETAILS SVCDTHREE ON SAC.VENDOR_CONTACT_DETAIL_ID = SVCDTHREE.VENDOR_CONTACT_DETAIL_ID)a GROUP BY VENDOR_ID) 
+						CD ON SV.VENDOR_ID = CD.VENDOR_ID
+						JOIN (SELECT SVRONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_REP_ID) AS VENDOR_REP_ID FROM SMNTP_VENDOR_REP GROUP BY VENDOR_ID) SAB
+							JOIN SMNTP_VENDOR_REP SVRONE ON SAB.VENDOR_REP_ID = SVRONE.VENDOR_REP_ID
+						) AVR ON SV.VENDOR_ID = AVR.VENDOR_ID
+						JOIN (
+							SELECT SVOONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_OWNER_ID) AS VENDOR_OWNER_ID FROM SMNTP_VENDOR_OWNERS GROUP BY VENDOR_ID) SAA
+							JOIN SMNTP_VENDOR_OWNERS SVOONE ON SAA.VENDOR_OWNER_ID = SVOONE.VENDOR_OWNER_ID
+						) SVO ON SV.VENDOR_ID = SVO.VENDOR_ID
+						JOIN SMNTP_OWNERSHIP SO ON SV.OWNERSHIP_TYPE = SO.OWNERSHIP_ID
+						JOIN SMNTP_VENDOR_STATUS SS ON SV.VENDOR_INVITE_ID = SS.VENDOR_INVITE_ID
+						JOIN SMNTP_TERMS_PAYMENT STP ON 
+							CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes_02.') THEN SS.TERMSPAYMENT 
+							ELSE SS.AVC_TERMSPAYMENT 
+							END  = STP.TERMS_PAYMENT_ID
+						JOIN (SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID, SVC.DATE_CREATED FROM SMNTP_VENDOR_AVC_CAT SVC 
+							JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID AND SCat.CATEGORY_ID != 259
+							JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+							JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT) SME ON SV.VENDOR_INVITE_ID = SME.VENDOR_INVITE_ID
+						LEFT JOIN (SELECT
+							SV.`VENDOR_ID`, CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS USERNAME,
+							SVSS.`EMAIL`,
+							SVSS.TRADE_VENDOR_TYPE, -- ROW_NUMBER() OVER(PARTITION BY SV.`VENDOR_ID` ORDER BY SVSS.`ID` DESC) AS row_num,
+							CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+								CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+							ELSE 
+								SV.TRADE_VENDOR_TYPE
+							END AS NEW_TRADE_VENDOR_TYPE, SVSS.TRADE_VENDOR_TYPE AS TRADE_VENDOR_TYPE_SVSS
+							FROM SMNTP_VENDOR SV
+							JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+							JOIN SMNTP_VENDOR_INVITE SVI ON SVI.`VENDOR_INVITE_ID` = SV.`VENDOR_INVITE_ID`
+							JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` AND SSS.DESCRIPTION LIKE "%PSIS%"
+							AND SSS.DESCRIPTION LIKE "%PSIS%"
+							-- AND SV.TRADE_VENDOR_TYPE != SVSS.TRADE_VENDOR_TYPE
+							AND SV.VENDOR_CODE_02 IN ('.$vendor_codes_02.')
+							ORDER BY SV.`VENDOR_ID`, SVSS.`ID` DESC) PSIS ON SV.`VENDOR_ID` = PSIS.VENDOR_ID
+						    -- AND PSIS.row_num = 1
+						    AND PSIS.TRADE_VENDOR_TYPE_SVSS != PSIS.NEW_TRADE_VENDOR_TYPE
+							-- AND PSIS.TRADE_VENDOR_TYPE = CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+						LEFT JOIN (SELECT SV.VENDOR_ID, SVSS.TRADE_VENDOR_TYPE, CASE SVSS.`TRADE_VENDOR_TYPE` WHEN 1 THEN "Outright" WHEN 2 THEN "Store Consignor" END AS VENDOR_TYPE,
+							CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS CONTACT_PERSON,
+							SVSS.POSITION, SVSS.EMAIL, SVSS.MOBILE_NO, -- ROW_NUMBER() OVER(PARTITION BY SV.`VENDOR_ID` ORDER BY SVSS.`ID` DESC) AS row_num,
+							CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+								CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+							ELSE 
+								SV.TRADE_VENDOR_TYPE
+							END AS NEW_TRADE_VENDOR_TYPE, SVSS.TRADE_VENDOR_TYPE AS TRADE_VENDOR_TYPE_SVSS
+							FROM SMNTP_VENDOR SV
+							JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+							JOIN SMNTP_VENDOR_INVITE SVI ON SVI.`VENDOR_INVITE_ID` = SV.`VENDOR_INVITE_ID`
+							JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` 
+							WHERE 1=1 AND SSS.DESCRIPTION = "SM Vendor Portal"
+							-- AND SV.TRADE_VENDOR_TYPE != SVSS.TRADE_VENDOR_TYPE
+							AND SV.VENDOR_CODE_02 IN ('.$vendor_codes_02.')
+							ORDER BY SV.`VENDOR_ID`, SVSS.`ID` DESC) VP ON SV.VENDOR_ID = VP.VENDOR_ID
+						    -- AND VP.row_num = 1
+						    AND VP.TRADE_VENDOR_TYPE_SVSS != VP.NEW_TRADE_VENDOR_TYPE
+							-- AND VP.TRADE_VENDOR_TYPE = CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+						WHERE SVI.REGISTRATION_TYPE IN (2,3) 
+						AND SV.VENDOR_CODE_02 IN ('.$vendor_codes_02.')';
+
+				// /return $query2;
+				$res2 = $this->db->query($query2);
+				//$this->db->last_query();
+				$res2 = $res2->result_array();
+
+			}else{
+				$res2 = [];
+			}
+
+			// return $this->db->last_query();
+			//return $res2;
+			
+
+			// registration type = 4
+		 $get_vendor_code_v4 = $this->db->query("SELECT SV.VENDOR_CODE_02 FROM SMNTP_VENDOR_INVITE SVI 
+											 JOIN SMNTP_VENDOR SV ON SVI.VENDOR_INVITE_ID = SV.VENDOR_INVITE_ID
+											 JOIN SMNTP_VENDOR_STATUS SVS ON SVI.VENDOR_INVITE_ID = SVS.VENDOR_INVITE_ID
+											 WHERE SVS.STATUS_ID = 19 
+											 AND SVI.REGISTRATION_TYPE IN (4) 
+											 AND SVS.DATE_UPDATED BETWEEN DATE_SUB(NOW(), INTERVAL ".$sys." DAY) AND NOW()");
+
+			$result_vendor_code_v4 = $get_vendor_code_v4->result();
+			$count_vendor_code_v4 = count($result_vendor_code_v4);
+			if($count_vendor_code_v4 > 0){
+				for($d=0; $d<$count_vendor_code_v4; $d++){
+					if($vendor_codes_v4 != ''){
+						$vendor_codes_v4 .= ',"'. $result_vendor_code_v4[$d]->VENDOR_CODE_02 . '"';	
+					}else{
+						$vendor_codes_v4 .= '"'. $result_vendor_code_v4[$d]->VENDOR_CODE_02 . '"';	
+					}
+				}
+			}
+
+			//return $vendor_codes_v4;
+
+			if($vendor_codes_v4 != ''){
+			
+				$query3 = 'SELECT DISTINCT
+						SV.VENDOR_CODE_02 AS VENDOR_CODE,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_LONG,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_SHORT,
+						UCASE(fn_remove_specialchar(SVA.ADDRESS_LINE)) AS ADDRESS,
+						UCASE(fn_remove_specialchar(SCity.CITY_NAME)) AS CITY,
+						UCASE(fn_remove_specialchar(SSP.STATE_PROV_NAME)) AS STATE, 
+						"PH" AS COUNTRY, 
+						SVA.ZIP_CODE AS ZIP_CODE,
+						CASE WHEN CD.TEL_NO = 0 THEN "" ELSE CD.TEL_NO END AS TEL_NO,
+						SO.OWNERSHIP_NAME AS OWNERSHIP,
+						CASE WHEN CD.FAX_NO = 0 THEN "" ELSE CD.FAX_NO END AS S_FAX,
+						CASE WHEN STP.TERMS_PAYMENT_NAME = "30 DAYS" THEN 200 WHEN STP.TERMS_PAYMENT_NAME = "60 DAYS" THEN 400 WHEN STP.TERMS_PAYMENT_NAME = "COD less 5%" THEN 562 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE = 37 THEN 842 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE != 37 THEN 810 WHEN "COD 7 DAYS" THEN 500 END AS TERMS_PAYMENT,
+						CONCAT(fn_remove_specialchar(AVR.FIRST_NAME), " ", fn_remove_specialchar(AVR.MIDDLE_NAME), " ",fn_remove_specialchar(AVR.LAST_NAME)) AS AUTHREP,
+						SV.TAX_ID_NO,
+						fn_remove_specialchar(SVO.FIRST_NAME) AS OWNER_FIRST_NAME, fn_remove_specialchar(SVO.MIDDLE_NAME) AS OWNER_MIDDLE_NAME, fn_remove_specialchar(SVO.LAST_NAME) AS OWNER_LAST_NAME,
+						CASE LENGTH(SME.COMPANY_CODE) 
+							WHEN 1 THEN CONCAT("00",SME.COMPANY_CODE)
+							WHEN 2 THEN CONCAT("0",SME.COMPANY_CODE)
+							WHEN 3 THEN SME.COMPANY_CODE END AS COMPANY_CODE,
+						CASE LENGTH(SME.DEPT) WHEN 1 THEN CONCAT("00",SME.DEPT)
+							WHEN 2 THEN CONCAT("0",SME.DEPT)
+							WHEN 3 THEN SME.DEPT END AS DEPT_CODE,
+						PSIS.USERNAME, PSIS.EMAIL, VP.VENDOR_TYPE, fn_remove_specialchar(VP.CONTACT_PERSON) AS CONTACT_PERSON, VP.POSITION, VP.EMAIL as VP_EMAIL, VP.MOBILE_NO
+						FROM SMNTP_VENDOR SV
+						JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+						JOIN SMNTP_VENDOR_TYPE SVT ON SV.VENDOR_TYPE = SVT.VENDOR_TYPE_ID
+						JOIN SMNTP_VENDOR_ADDRESSES SVA ON SV.VENDOR_ID = SVA.VENDOR_ID AND SVA.ADDRESS_TYPE = "1" AND `PRIMARY` = 1
+						JOIN SMNTP_CITY SCity ON SVA.BRGY_MUNICIPALITY_ID = SCity.CITY_ID
+						JOIN SMNTP_STATE_PROVINCE SSP ON SVA.STATE_PROVINCE_ID = SSP.STATE_PROV_ID
+						JOIN SMNTP_COUNTRY SCountry ON SVA.COUNTRY_ID = SCountry.COUNTRY_ID
+						JOIN(SELECT VENDOR_ID, REPLACE(GROUP_CONCAT(TEL_NO),",","") AS TEL_NO, SUM(TEL_NO_EXTENSION_LOCAL_NUMBER)AS TEL_NO_EXTENSION_LOCAL_NUMBER, REPLACE(GROUP_CONCAT(FAX_NO),",","") AS FAX_NO,SUM(FAX_NO_EXTENSION_LOCAL_NUMBER) AS FAX_NO_EXTENSION_LOCAL_NUMBER,SUM(MOBILE_NO) AS MOBILE_NO, REPLACE(GROUP_CONCAT(EMAIL),",","") AS EMAIL FROM (
+						SELECT
+						SVCDTHREE.VENDOR_ID,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN CONCAT(SVCDTHREE.AREA_CODE, " ",SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS TEL_NO, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS TEL_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN CONCAT(SVCDTHREE.AREA_CODE, " ", SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS FAX_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS FAX_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 3 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS MOBILE_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 4 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS EMAIL
+						FROM 
+							(SELECT VENDOR_ID, CONTACT_DETAIL_TYPE, MIN(VENDOR_CONTACT_DETAIL_ID) AS VENDOR_CONTACT_DETAIL_ID FROM SMNTP_VENDOR_CONTACT_DETAILS GROUP BY VENDOR_ID,CONTACT_DETAIL_TYPE) SAC
+							JOIN SMNTP_VENDOR_CONTACT_DETAILS SVCDTHREE ON SAC.VENDOR_CONTACT_DETAIL_ID = SVCDTHREE.VENDOR_CONTACT_DETAIL_ID)a GROUP BY VENDOR_ID) 
+						CD ON SV.VENDOR_ID = CD.VENDOR_ID
+						JOIN (SELECT SVRONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_REP_ID) AS VENDOR_REP_ID FROM SMNTP_VENDOR_REP GROUP BY VENDOR_ID) SAB
+							JOIN SMNTP_VENDOR_REP SVRONE ON SAB.VENDOR_REP_ID = SVRONE.VENDOR_REP_ID
+						) AVR ON SV.VENDOR_ID = AVR.VENDOR_ID
+						JOIN (
+							SELECT SVOONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_OWNER_ID) AS VENDOR_OWNER_ID FROM SMNTP_VENDOR_OWNERS GROUP BY VENDOR_ID) SAA
+							JOIN SMNTP_VENDOR_OWNERS SVOONE ON SAA.VENDOR_OWNER_ID = SVOONE.VENDOR_OWNER_ID
+						) SVO ON SV.VENDOR_ID = SVO.VENDOR_ID
+						JOIN SMNTP_OWNERSHIP SO ON SV.OWNERSHIP_TYPE = SO.OWNERSHIP_ID
+						JOIN SMNTP_VENDOR_STATUS SS ON SV.VENDOR_INVITE_ID = SS.VENDOR_INVITE_ID
+						JOIN SMNTP_TERMS_PAYMENT STP ON 
+							CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes_v4.') THEN SS.TERMSPAYMENT 
+							ELSE SS.AVC_TERMSPAYMENT 
+							END  = STP.TERMS_PAYMENT_ID
+						JOIN (SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID FROM SMNTP_VENDOR_AVC_CAT SVC 
+							JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID AND SCat.CATEGORY_ID != 259
+							JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+							JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT) SME ON SV.VENDOR_INVITE_ID = SME.VENDOR_INVITE_ID
+						LEFT JOIN (SELECT
+							SV.`VENDOR_ID`, CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS USERNAME,
+							SVSS.`EMAIL`,
+							SVSS.TRADE_VENDOR_TYPE
+							FROM SMNTP_VENDOR SV
+							JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+							JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` AND SSS.DESCRIPTION LIKE "%PSIS%"
+							AND SSS.DESCRIPTION LIKE "%PSIS%")PSIS ON SV.`VENDOR_ID` = PSIS.VENDOR_ID
+							AND PSIS.TRADE_VENDOR_TYPE = SV.TRADE_VENDOR_TYPE
+						LEFT JOIN (SELECT SV.VENDOR_ID,SVSS.`TRADE_VENDOR_TYPE`, CASE SVSS.`TRADE_VENDOR_TYPE` WHEN 1 THEN "Outright" WHEN 2 THEN "Store Consignor" END AS VENDOR_TYPE,
+							CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS CONTACT_PERSON,
+							SVSS.POSITION, SVSS.EMAIL, SVSS.MOBILE_NO
+							FROM SMNTP_VENDOR SV
+							JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+							JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` 
+							WHERE 1=1 AND SSS.DESCRIPTION = "SM Vendor Portal") VP ON SV.VENDOR_ID = VP.VENDOR_ID
+							AND VP.TRADE_VENDOR_TYPE = SV.TRADE_VENDOR_TYPE
+						WHERE SV.VENDOR_CODE_02 IN ('.$vendor_codes_v4.')';
+		
+			$res3 = $this->db->query($query3);
+			$res3 = $res3->result_array();
+		}else{
+			$res3 = [];
+		}	
+
+		//return $this->db->last_query();
+		//return $res3;
+
+		if($vendor_codes_v5 != ''){
+			
+				$query4 = 'SELECT DISTINCT
+						SV.VENDOR_CODE,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_LONG,
+						UCASE(fn_remove_specialchar(SV.VENDOR_NAME)) AS VENDOR_NAME_SHORT,
+						UCASE(fn_remove_specialchar(SVA.ADDRESS_LINE)) AS ADDRESS,
+						UCASE(fn_remove_specialchar(SCity.CITY_NAME)) AS CITY,
+						UCASE(fn_remove_specialchar(SSP.STATE_PROV_NAME)) AS STATE, 
+						"PH" AS COUNTRY, 
+						SVA.ZIP_CODE AS ZIP_CODE,
+						CASE WHEN CD.TEL_NO = 0 THEN "" ELSE CD.TEL_NO END AS TEL_NO,
+						SO.OWNERSHIP_NAME AS OWNERSHIP,
+						CASE WHEN CD.FAX_NO = 0 THEN "" ELSE CD.FAX_NO END AS S_FAX,
+						CASE WHEN STP.TERMS_PAYMENT_NAME = "30 DAYS" THEN 200 WHEN STP.TERMS_PAYMENT_NAME = "60 DAYS" THEN 400 WHEN STP.TERMS_PAYMENT_NAME = "COD less 5%" THEN 562 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE = 37 THEN 842 WHEN STP.TERMS_PAYMENT_NAME = "Immediate" AND SME.COMPANY_CODE != 37 THEN 810 WHEN "COD 7 DAYS" THEN 500 END AS TERMS_PAYMENT,
+						CONCAT(fn_remove_specialchar(AVR.FIRST_NAME), " ", fn_remove_specialchar(AVR.MIDDLE_NAME), " ",fn_remove_specialchar(AVR.LAST_NAME)) AS AUTHREP,
+						SV.TAX_ID_NO,
+						fn_remove_specialchar(SVO.FIRST_NAME) AS OWNER_FIRST_NAME, fn_remove_specialchar(SVO.MIDDLE_NAME) AS OWNER_MIDDLE_NAME, fn_remove_specialchar(SVO.LAST_NAME) AS OWNER_LAST_NAME,
+						CASE LENGTH(SME.COMPANY_CODE) 
+							WHEN 1 THEN CONCAT("00",SME.COMPANY_CODE)
+							WHEN 2 THEN CONCAT("0",SME.COMPANY_CODE)
+							WHEN 3 THEN SME.COMPANY_CODE END AS COMPANY_CODE,
+						CASE LENGTH(SME.DEPT) WHEN 1 THEN CONCAT("00",SME.DEPT)
+							WHEN 2 THEN CONCAT("0",SME.DEPT)
+							WHEN 3 THEN SME.DEPT END AS DEPT_CODE,
+						PSIS.USERNAME, PSIS.EMAIL, VP.VENDOR_TYPE, fn_remove_specialchar(VP.CONTACT_PERSON) AS CONTACT_PERSON, VP.POSITION, VP.EMAIL as VP_EMAIL, VP.MOBILE_NO
+						FROM SMNTP_VENDOR SV
+						JOIN SMNTP_VENDOR_INVITE SVI ON SV.VENDOR_INVITE_ID = SVI.VENDOR_INVITE_ID
+						JOIN SMNTP_VENDOR_TYPE SVT ON SV.VENDOR_TYPE = SVT.VENDOR_TYPE_ID
+						JOIN SMNTP_VENDOR_ADDRESSES SVA ON SV.VENDOR_ID = SVA.VENDOR_ID AND SVA.ADDRESS_TYPE = "1" AND `PRIMARY` = 1
+						JOIN SMNTP_CITY SCity ON SVA.BRGY_MUNICIPALITY_ID = SCity.CITY_ID
+						JOIN SMNTP_STATE_PROVINCE SSP ON SVA.STATE_PROVINCE_ID = SSP.STATE_PROV_ID
+						JOIN SMNTP_COUNTRY SCountry ON SVA.COUNTRY_ID = SCountry.COUNTRY_ID
+						JOIN(SELECT VENDOR_ID, REPLACE(GROUP_CONCAT(TEL_NO),",","") AS TEL_NO, SUM(TEL_NO_EXTENSION_LOCAL_NUMBER)AS TEL_NO_EXTENSION_LOCAL_NUMBER, REPLACE(GROUP_CONCAT(FAX_NO),",","") AS FAX_NO,SUM(FAX_NO_EXTENSION_LOCAL_NUMBER) AS FAX_NO_EXTENSION_LOCAL_NUMBER,SUM(MOBILE_NO) AS MOBILE_NO, REPLACE(GROUP_CONCAT(EMAIL),",","") AS EMAIL FROM (
+						SELECT
+						SVCDTHREE.VENDOR_ID,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN CONCAT(SVCDTHREE.AREA_CODE, " ",SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS TEL_NO, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 1 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS TEL_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN CONCAT(SVCDTHREE.AREA_CODE, " ", SVCDTHREE.CONTACT_DETAIL) ELSE "" END AS FAX_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 2 THEN SVCDTHREE.EXTENSION_LOCAL_NUMBER ELSE "" END AS FAX_NO_EXTENSION_LOCAL_NUMBER, 
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 3 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS MOBILE_NO,
+						CASE WHEN SVCDTHREE.CONTACT_DETAIL_TYPE = 4 THEN SVCDTHREE.CONTACT_DETAIL ELSE "" END AS EMAIL
+						FROM 
+							(SELECT VENDOR_ID, CONTACT_DETAIL_TYPE, MIN(VENDOR_CONTACT_DETAIL_ID) AS VENDOR_CONTACT_DETAIL_ID FROM SMNTP_VENDOR_CONTACT_DETAILS GROUP BY VENDOR_ID,CONTACT_DETAIL_TYPE) SAC
+							JOIN SMNTP_VENDOR_CONTACT_DETAILS SVCDTHREE ON SAC.VENDOR_CONTACT_DETAIL_ID = SVCDTHREE.VENDOR_CONTACT_DETAIL_ID)a GROUP BY VENDOR_ID) 
+						CD ON SV.VENDOR_ID = CD.VENDOR_ID
+						JOIN (SELECT SVRONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_REP_ID) AS VENDOR_REP_ID FROM SMNTP_VENDOR_REP GROUP BY VENDOR_ID) SAB
+							JOIN SMNTP_VENDOR_REP SVRONE ON SAB.VENDOR_REP_ID = SVRONE.VENDOR_REP_ID
+						) AVR ON SV.VENDOR_ID = AVR.VENDOR_ID
+						JOIN (
+							SELECT SVOONE.* FROM 
+							(SELECT VENDOR_ID, MIN(VENDOR_OWNER_ID) AS VENDOR_OWNER_ID FROM SMNTP_VENDOR_OWNERS GROUP BY VENDOR_ID) SAA
+							JOIN SMNTP_VENDOR_OWNERS SVOONE ON SAA.VENDOR_OWNER_ID = SVOONE.VENDOR_OWNER_ID
+						) SVO ON SV.VENDOR_ID = SVO.VENDOR_ID
+						JOIN SMNTP_OWNERSHIP SO ON SV.OWNERSHIP_TYPE = SO.OWNERSHIP_ID
+						JOIN SMNTP_VENDOR_STATUS SS ON SV.VENDOR_INVITE_ID = SS.VENDOR_INVITE_ID
+						JOIN SMNTP_TERMS_PAYMENT STP ON 
+							CASE WHEN SV.VENDOR_CODE IN ('.$vendor_codes_v5.') THEN SS.TERMSPAYMENT 
+							ELSE SS.AVC_TERMSPAYMENT 
+							END  = STP.TERMS_PAYMENT_ID
+						JOIN (SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID FROM SMNTP_VENDOR_CATEGORIES SVC 
+							JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID AND SCat.CATEGORY_ID != 259
+							JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+							JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT) SME ON SV.VENDOR_INVITE_ID = SME.VENDOR_INVITE_ID
+						LEFT JOIN (SELECT
+								SV.`VENDOR_ID`, CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS USERNAME,
+								SVSS.`EMAIL`,
+								SVSS.TRADE_VENDOR_TYPE
+								FROM SMNTP_VENDOR SV
+								JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+								JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` AND SSS.DESCRIPTION LIKE "%PSIS%"
+								AND SSS.DESCRIPTION LIKE "%PSIS%")PSIS ON SV.`VENDOR_ID` = PSIS.VENDOR_ID
+								AND CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+									CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+								ELSE 
+									SV.TRADE_VENDOR_TYPE
+								END
+								= PSIS.TRADE_VENDOR_TYPE
+							LEFT JOIN (SELECT SV.VENDOR_ID,SVSS.`TRADE_VENDOR_TYPE`, CASE SVSS.`TRADE_VENDOR_TYPE` WHEN 1 THEN "Outright" WHEN 2 THEN "Store Consignor" END AS VENDOR_TYPE,
+								CONCAT(SVSS.`FIRST_NAME`, " ", SVSS.`MIDDLE_NAME`, " ", SVSS.`LAST_NAME`) AS CONTACT_PERSON,
+								SVSS.POSITION, SVSS.EMAIL, SVSS.MOBILE_NO
+								FROM SMNTP_VENDOR SV
+								JOIN SMNTP_VENDOR_SM_SYSTEMS SVSS ON SV.VENDOR_INVITE_ID = SVSS.`VENDOR_INVITE_ID`
+								JOIN SMNTP_SM_SYSTEMS SSS ON SVSS.`SM_SYSTEM_ID` = SSS.`SM_SYSTEM_ID` 
+								WHERE 1=1 AND SSS.DESCRIPTION = "SM Vendor Portal") VP ON SV.VENDOR_ID = VP.VENDOR_ID 
+								AND CASE WHEN SVI.PREV_REGISTRATION_TYPE = 4 OR SVI.REGISTRATION_TYPE = 4 THEN 
+									CASE SV.TRADE_VENDOR_TYPE WHEN 1 THEN 2 ELSE 1 END
+								ELSE 
+									SV.TRADE_VENDOR_TYPE
+								END
+								= VP.TRADE_VENDOR_TYPE
+						WHERE SV.VENDOR_CODE IN ('.$vendor_codes_v5.')';
+		
+			$res4 = $this->db->query($query4);
+			$res4 = $res4->result_array();
+		}else{
+			$res4 = [];
+		}	
+
+
+		//return $this->db->last_query();
+
+		//return $res3;
+
+		$finalquery = array_merge($res, $res2, $res3, $res4);
+
+
+		$arr_exclude = [];
+
+		foreach($old_dept as $od){
+			if(!in_array($od['VENDOR_INVITE_ID'], array_column($arr_exclude, 'VENDOR_INVITE_ID'))){
+				if( $od['TYPE'] == 'VC01'){
+					array_push($arr_exclude, array('VENDOR_INVITE_ID' => $od['VENDOR_INVITE_ID'], 'CATEGORY_ID_01' => $od['CATEGORY_ID'], 'CATEGORY_ID_02' => '0'));
+				}else{
+					array_push($arr_exclude, array('VENDOR_INVITE_ID' => $od['VENDOR_INVITE_ID'], 'CATEGORY_ID_01' => '0', 'CATEGORY_ID_02' => $od['CATEGORY_ID']));
+				}
+
+
+				
+			}else{
+				if( $od['TYPE'] == 'VC01'){
+					$arr_dim = array_search($od['VENDOR_INVITE_ID'], array_column($arr_exclude, 'VENDOR_INVITE_ID'));
+					$arr_exclude[$arr_dim]['CATEGORY_ID_01'] = $arr_exclude[$arr_dim]['CATEGORY_ID_01'] . ","  .$od['CATEGORY_ID'];
+				}else{
+					$arr_dim = array_search($od['VENDOR_INVITE_ID'], array_column($arr_exclude, 'VENDOR_INVITE_ID'));
+					$arr_exclude[$arr_dim]['CATEGORY_ID_02'] = $arr_exclude[$arr_dim]['CATEGORY_ID_02'] . "," . $od['CATEGORY_ID'];
+				}
+			}
+
+		}
+
+		//return $arr_exclude;
+
+		//return $old_dept;
+
+
+		if(count($arr_exclude) != 0){
+
+			foreach ($arr_exclude as $value) {
+				$category_01 = ($value['CATEGORY_ID_01'] != '') ? " AND SVC.CATEGORY_ID NOT IN (".$value['CATEGORY_ID_01'].")" : "";
+				$category_02 = ($value['CATEGORY_ID_02'] != '') ? " AND SVC.CATEGORY_ID NOT IN (".$value['CATEGORY_ID_02'].")" : "";
+					$cat_list = $this->db->query("SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID, SV.VENDOR_CODE FROM SMNTP_VENDOR_CATEGORIES SVC 
+						JOIN SMNTP_VENDOR SV ON SV.VENDOR_INVITE_ID = SVC.VENDOR_INVITE_ID
+						JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID
+						JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+						JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT
+						WHERE SVC.VENDOR_INVITE_ID = ".$value['VENDOR_INVITE_ID']." ".$category_01."
+						UNION ALL
+						SELECT DISTINCT SME.`COMPANY_CODE`, SME.DEPT, SVC.VENDOR_INVITE_ID, SV.VENDOR_CODE_02 AS VENDOR_CODE FROM SMNTP_VENDOR_AVC_CAT SVC 
+						JOIN SMNTP_VENDOR SV ON SV.VENDOR_INVITE_ID = SVC.VENDOR_INVITE_ID
+						JOIN SMNTP_CATEGORY SCat ON SVC.CATEGORY_ID = SCat.CATEGORY_ID
+						JOIN (SELECT DISTINCT DEPT_CODE, DEPT_DESC FROM TEST_20220525) TTable ON SCat.CATEGORY_NAME = TTable.DEPT_DESC 
+						JOIN SMNTP_MMS_ENVDEPT SME ON TTable.DEPT_CODE = SME.DEPT
+						WHERE SVC.VENDOR_INVITE_ID = ".$value['VENDOR_INVITE_ID']." ".$category_02." ")->result_array();
+
+
+			$count_cat_list = count($cat_list);
+
+
+				for($i=0; $i<$count_cat_list; $i++){
+					if(strlen($cat_list[$i]['DEPT']) <= 3){
+						$dept = $cat_list[$i]['DEPT'];
+					}else if(strlen($cat_list[$i]['DEPT']) == 2){
+						$dept = '0'.$cat_list[$i]['DEPT'];
+					}else{
+						$dept = '00'.$cat_list[$i]['DEPT'];
+					}
+					
+					$findKey = $this->search_revisions($finalquery, $cat_list[$i]['VENDOR_CODE'], 'VENDOR_CODE', $dept, 'DEPT_CODE');
+					if(isset($findKey)){
+						foreach($findKey as $susi){
+							unset($finalquery[$susi]);
+						}
+					}
+				}	
+			}	
+		}
+
+		
+		//return $cat_list;
+		//return $this->db->last_query();
+		
+		$finalquery = array_values($finalquery);
+		return $finalquery;
+
+		
+		//print_r($findKey);
+
+	}
+
+	function search_revisions($dataArray, $search_value, $key_to_search, $other_matching_value = null, $other_matching_key = null) {
+    // This function will search the revisions for a certain value
+    // related to the associative key you are looking for3
+	    $keys = array();
+	    foreach ($dataArray as $key => $cur_value) {
+	        if ($cur_value[$key_to_search] == $search_value) {
+	            if (isset($other_matching_key) && isset($other_matching_value)) {
+	                if ($cur_value[$other_matching_key] == $other_matching_value) {
+	                    $keys[] = $key;
+	                }
+	            } else {
+	                // I must keep in mind that some searches may have multiple
+	                // matches and others would not, so leave it open with no continues.
+	                $keys[] = $key;
+	            }
+	        }
+	    }
+	    return $keys;
+	}
+
+	
+	function vtrad($vendor_code, $company_code){
+		$this->db->select('TPCDE');
+		$this->db->from('SMNTP_MMS_VTRAD');
+		$this->db->where('VENDOR_CODE', $vendor_code);
+		$this->db->where('COMPANY_CODE', $company_code);
+
+		$query = $this->db->get();
+
+		return $query->result_array();
+	}
+
+	function update_revert_config(){
+		$query = $this->db->query('UPDATE SMNTP_SYSTEM_CONFIG SET CONFIG_VALUE = 1 WHERE CONFIG_NAME = "extraction_mms"');
+
+		return $query;
+	}
+}
+?>
