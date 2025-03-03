@@ -1,0 +1,17 @@
+thead th.sort_column {
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-position: center right;
+}
+
+thead th.sort_column.sort_default {
+	background-image: url(http://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.15/images/sort_both.png);
+}
+
+thead th.sort_column.sort_asc {
+	background-image: url(http://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.15/images/sort_asc.png);
+}
+
+thead th.sort_column.sort_desc {
+	background-image: url(http://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.15/images/sort_desc.png);
+}
